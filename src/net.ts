@@ -1,6 +1,6 @@
 import http from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import Express, { Request, Response, json } from "express";
+import Express, { NextFunction, Request, Response, json } from "express";
 import { config } from "./lib/config.js";
 import { z } from "zod";
 import { cache } from "./lib/cache.js";
@@ -21,7 +21,30 @@ const donatorStatusBody = z.object({
     banned: z.boolean(),
 });
 
-app.put("/bid_item", json(), (req: Request, res: Response) => {
+async function auth(req: Request, res: Response, next: NextFunction) {
+    const key = req.headers.authorization?.slice("Bearer ".length);
+    if (!key) {
+        return res.status(400).send();
+    }
+
+    try {
+        const rows = await db.pool.query(
+            `SELECT * FROM ${config.db.database}.API_KEYS WHERE \`key\` = ?`,
+            [key]
+        );
+
+        if (rows.length > 0) {
+            return next();
+        } else {
+            return res.status(401).send();
+        }
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send();
+    }
+}
+
+app.put("/bid_item", [auth, json()], (req: Request, res: Response) => {
     let id: number;
     try {
         id = bidItemBody.parse(req.body).id;
@@ -37,7 +60,7 @@ app.put("/bid_item", json(), (req: Request, res: Response) => {
     return res.send();
 });
 
-app.get("/refresh_bids", async (req: Request, res: Response) => {
+app.get("/refresh_bids", auth, async (req: Request, res: Response) => {
     try {
         await broadcastBids();
         return res.send();
@@ -47,44 +70,48 @@ app.get("/refresh_bids", async (req: Request, res: Response) => {
     }
 });
 
-app.put("/donator/status", json(), async (req: Request, res: Response) => {
-    let body: {
-        username: string;
-        banned: boolean;
-    };
-    try {
-        body = donatorStatusBody.parse(req.body);
-    } catch (err) {
-        console.log(err);
-        return res.status(400).send();
-    }
-
-    try {
-        const isBanned = await isDonatorBanned(body.username);
-        if (isBanned) {
-            if (!body.banned) {
-                await db.pool.query(
-                    `DELETE FROM ${config.db.database}.BANNED_USERS WHERE username = ?`,
-                    [body.username]
-                );
-            }
-        } else {
-            if (body.banned) {
-                await db.pool.query(
-                    `INSERT INTO ${config.db.database}.BANNED_USERS (username) VALUES ( ? )`,
-                    [body.username]
-                );
-            }
+app.put(
+    "/donator/status",
+    [auth, json()],
+    async (req: Request, res: Response) => {
+        let body: {
+            username: string;
+            banned: boolean;
+        };
+        try {
+            body = donatorStatusBody.parse(req.body);
+        } catch (err) {
+            console.log(err);
+            return res.status(400).send();
         }
-    } catch (err) {
-        console.log(err);
-        return res.status(500).send();
+
+        try {
+            const isBanned = await isDonatorBanned(body.username);
+            if (isBanned) {
+                if (!body.banned) {
+                    await db.pool.query(
+                        `DELETE FROM ${config.db.database}.BANNED_USERS WHERE username = ?`,
+                        [body.username]
+                    );
+                }
+            } else {
+                if (body.banned) {
+                    await db.pool.query(
+                        `INSERT INTO ${config.db.database}.BANNED_USERS (username) VALUES ( ? )`,
+                        [body.username]
+                    );
+                }
+            }
+        } catch (err) {
+            console.log(err);
+            return res.status(500).send();
+        }
+
+        return res.send();
     }
+);
 
-    return res.send();
-});
-
-app.post("/test", json(), async (req: Request, res: Response) => {
+app.post("/test", [auth, json()], async (req: Request, res: Response) => {
     await handleEvent(req.body);
     res.send();
 });
