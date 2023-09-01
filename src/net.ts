@@ -57,6 +57,11 @@ app.put("/bid_item", [auth, json()], async (req: Request, res: Response) => {
         return res.status(400).send();
     }
 
+    const items = cache.get("bidItems");
+    if (!items[id]) {
+        return res.status(404).send();
+    }
+
     cache.set("currentBidItemId", id);
     broadcast(bidItemMessage());
     console.log("update bid item id", id);
@@ -165,11 +170,11 @@ export async function bidsMessage() {
     return {
         type: "bids",
         data: bids,
-    }
+    };
 }
 
 function bidItemMessage() {
-    const id = cache.get("currentBidItemId")
+    const id = cache.get("currentBidItemId");
 
     return {
         type: "bid_item",
