@@ -127,6 +127,15 @@ wss.on("connection", (socket) => {
 
     socket.send(
         JSON.stringify({
+            type: "bid_item",
+            data: {
+                id: cache.get("currentBidItemId"),
+            },
+        })
+    );
+
+    socket.send(
+        JSON.stringify({
             type: "bids",
             data: formatTopBids(),
         })
