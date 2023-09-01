@@ -124,6 +124,13 @@ wss.on("connection", (socket) => {
     socket.on("error", (err) => {
         console.log(err);
     });
+
+    socket.send(
+        JSON.stringify({
+            type: "bids",
+            data: formatTopBids(),
+        })
+    );
 });
 
 server.on("upgrade", (request, socket, head) => {
@@ -148,6 +155,15 @@ export function broadcast(message: object) {
 }
 
 export async function broadcastBids() {
+    const bids = formatTopBids();
+
+    broadcast({
+        type: "bids",
+        data: bids,
+    });
+}
+
+async function formatTopBids() {
     const bids: {
         [key: number]: {
             username: string;
@@ -159,10 +175,7 @@ export async function broadcastBids() {
         bids[k] = v;
     });
 
-    broadcast({
-        type: "bids",
-        data: bids,
-    });
+    return bids;
 }
 
 async function broadcastBidItemId() {
