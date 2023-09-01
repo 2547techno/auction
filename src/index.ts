@@ -39,7 +39,7 @@ async function main() {
 
 export async function handleEvent(data: any) {
     if (data.type != "tip") return;
-    console.log("event", data);
+    console.log("tip event", data);
     const username: string = data.data.username.toLowerCase();
 
     if (!(await isValidDonator(username))) return;
