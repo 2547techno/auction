@@ -3,12 +3,12 @@ import dotenv from "dotenv";
 import { io } from "socket.io-client";
 import { config } from "./lib/config.js";
 import { Bid, db } from "./lib/db.js";
-import { broadcastBids, initNet } from "./net.js";
+import { bidsMessage, broadcast, initNet } from "./net.js";
 import { cache, initCache } from "./lib/cache.js";
 dotenv.config();
 
 async function main() {
-    initCache();
+    await initCache();
     await initNet();
     const socket = io("https://realtime.streamelements.com", {
         transports: ["websocket"],
@@ -49,7 +49,7 @@ export async function handleEvent(data: any) {
     try {
         await insertDonation(username, amount, cache.get("currentBidItemId"));
 
-        await broadcastBids();
+        broadcast(await bidsMessage());
     } catch (err) {
         console.log(err);
     }

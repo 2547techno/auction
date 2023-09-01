@@ -48,7 +48,7 @@ async function auth(req: Request, res: Response, next: NextFunction) {
     }
 }
 
-app.put("/bid_item", [auth, json()], (req: Request, res: Response) => {
+app.put("/bid_item", [auth, json()], async (req: Request, res: Response) => {
     let id: number;
     try {
         id = bidItemBody.parse(req.body).id;
@@ -58,7 +58,7 @@ app.put("/bid_item", [auth, json()], (req: Request, res: Response) => {
     }
 
     cache.set("currentBidItemId", id);
-    broadcastBidItemId();
+    broadcast(bidItemMessage());
     console.log("update bid item id", id);
 
     return res.send();
@@ -66,7 +66,7 @@ app.put("/bid_item", [auth, json()], (req: Request, res: Response) => {
 
 app.get("/refresh_bids", auth, async (req: Request, res: Response) => {
     try {
-        await broadcastBids();
+        broadcast(await bidsMessage());
         return res.send();
     } catch (err) {
         console.log(err);
@@ -125,21 +125,8 @@ wss.on("connection", async (socket) => {
         console.log(err);
     });
 
-    socket.send(
-        JSON.stringify({
-            type: "bid_item",
-            data: {
-                id: cache.get("currentBidItemId"),
-            },
-        })
-    );
-
-    socket.send(
-        JSON.stringify({
-            type: "bids",
-            data: await formatTopBids(),
-        })
-    );
+    socket.send(JSON.stringify(bidItemMessage()));
+    socket.send(JSON.stringify(await bidsMessage()));
 });
 
 server.on("upgrade", (request, socket, head) => {
@@ -163,16 +150,7 @@ export function broadcast(message: object) {
     });
 }
 
-export async function broadcastBids() {
-    const bids = await formatTopBids();
-
-    broadcast({
-        type: "bids",
-        data: bids,
-    });
-}
-
-async function formatTopBids() {
+export async function bidsMessage() {
     const bids: {
         [key: number]: {
             username: string;
@@ -184,16 +162,22 @@ async function formatTopBids() {
         bids[k] = v;
     });
 
-    return bids;
+    return {
+        type: "bids",
+        data: bids,
+    }
 }
 
-async function broadcastBidItemId() {
-    broadcast({
+function bidItemMessage() {
+    const id = cache.get("currentBidItemId")
+
+    return {
         type: "bid_item",
         data: {
-            id: cache.get("currentBidItemId"),
+            id: id,
+            name: cache.get("bidItems")[id] ?? "",
         },
-    });
+    };
 }
 
 export function initNet() {
