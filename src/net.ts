@@ -1,4 +1,6 @@
 import http from "http";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
 import { WebSocketServer, WebSocket } from "ws";
 import Express, { NextFunction, Request, Response, json } from "express";
 import { config } from "./lib/config.js";
@@ -7,8 +9,10 @@ import { cache } from "./lib/cache.js";
 import { calculateTopBids, handleEvent, isDonatorBanned } from "./index.js";
 import { db } from "./lib/db.js";
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = config.rest.port;
 const app = Express();
+app.use(Express.static(path.join(__dirname, "./public")));
 const wss = new WebSocketServer({ noServer: true });
 export const server = http.createServer(app);
 
