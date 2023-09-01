@@ -120,7 +120,7 @@ app.post("/test", [auth, json()], async (req: Request, res: Response) => {
     res.send();
 });
 
-wss.on("connection", (socket) => {
+wss.on("connection", async (socket) => {
     socket.on("error", (err) => {
         console.log(err);
     });
@@ -137,7 +137,7 @@ wss.on("connection", (socket) => {
     socket.send(
         JSON.stringify({
             type: "bids",
-            data: formatTopBids(),
+            data: await formatTopBids(),
         })
     );
 });
@@ -164,7 +164,7 @@ export function broadcast(message: object) {
 }
 
 export async function broadcastBids() {
-    const bids = formatTopBids();
+    const bids = await formatTopBids();
 
     broadcast({
         type: "bids",
