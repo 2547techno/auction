@@ -98,17 +98,11 @@ app.put(
             const isBanned = await isDonatorBanned(body.username);
             if (isBanned) {
                 if (!body.banned) {
-                    await db.pool.query(
-                        `DELETE FROM ${config.db.database}.BANNED_USERS WHERE username = ?`,
-                        [body.username]
-                    );
+                    await unbanUser(body.username.toLowerCase());
                 }
             } else {
                 if (body.banned) {
-                    await db.pool.query(
-                        `INSERT INTO ${config.db.database}.BANNED_USERS (username) VALUES ( ? )`,
-                        [body.username]
-                    );
+                    await banUser(body.username.toLowerCase());
                 }
             }
         } catch (err) {
@@ -146,6 +140,27 @@ server.on("upgrade", (request, socket, head) => {
         socket.destroy();
     }
 });
+
+async function banUser(username: string) {
+    await db.pool.query(
+        `INSERT INTO ${config.db.database}.BANNED_USERS (username) VALUES ( ? )`,
+        [username]
+    );
+
+    await db.pool.query(
+        `DELETE FROM ${config.db.database}.DONATIONS WHERE username = ?`,
+        [username]
+    );
+
+    broadcast(await bidsMessage());
+}
+
+async function unbanUser(username: string) {
+    await db.pool.query(
+        `DELETE FROM ${config.db.database}.BANNED_USERS WHERE username = ?`,
+        [username]
+    );
+}
 
 export function broadcast(message: object) {
     wss.clients.forEach((client) => {
