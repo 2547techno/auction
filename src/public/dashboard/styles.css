@@ -1,0 +1,14 @@
+main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.api-key {
+    display: flex;
+    justify-content: center;
+}
+
+#api-key-input {
+    margin-left: 5px;
+}
