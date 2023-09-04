@@ -33,12 +33,15 @@ function refreshBidItem() {
 }
 
 function refreshBids() {
-    const ol = document.createElement("ol");
-    for (const bid of bids[bidItem.id] ?? []) {
-        const li = document.createElement("li");
-        li.innerText = `$${bid.bid} ${bid.username}`;
-        ol.appendChild(li);
+    const outter = document.createElement("div");
+    outter.className = "outter";
+    for (const [i, bid] of (bids[bidItem.id] ?? []).entries()) {
+        const div = document.createElement("div");
+        div.className = "inner";
+        div.innerText = `$${bid.bid} ${bid.username}`;
+        div.style = `font-size: ${80 - i * 6}px`;
+        outter.appendChild(div);
     }
 
-    document.getElementById("bids").replaceChildren(ol);
+    document.getElementById("bids").replaceChildren(outter);
 }
