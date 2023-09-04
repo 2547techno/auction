@@ -69,6 +69,18 @@ app.put("/bid_item", [auth, json()], async (req: Request, res: Response) => {
     return res.send();
 });
 
+app.get("/bid_items", auth, async (req: Request, res: Response) => {
+    try {
+        const rows = await db.pool.query(
+            `SELECT * FROM ${config.db.database}.ITEMS`
+        );
+        return res.json(rows);
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send();
+    }
+});
+
 app.get("/refresh_bids", auth, async (req: Request, res: Response) => {
     try {
         broadcast(await bidsMessage());
