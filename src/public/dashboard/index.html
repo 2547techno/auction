@@ -10,12 +10,33 @@
 
     <body>
         <main>
-            <div class="api-key">
+            <div class="api-key section">
                 API Key:
                 <input type="password" name="api-key" id="api-key-input" />
                 <button id="toggle-hidden">Show Key</button>
                 <button id="save-key">Save</button>
                 <button id="clear-key">Clear</button>
+            </div>
+            <div class="ban-unban section">
+                Ban/Unban User:
+                <input
+                    type="text"
+                    name="ban-unban-user"
+                    id="ban-unban-user-input"
+                />
+                <button id="ban-user-button">Ban</button>
+                <button id="unban-user-button">Unban</button>
+            </div>
+            <div class="update-overlay section">
+                <button id="update-overlay-button">Refresh Bids Overlay</button>
+            </div>
+            <div class="update-bid-item section">
+                <div id="current-bid-item">Current bid item:</div>
+                <select name="bid-items" id="bid-items-dropdown"></select>
+                <button id="update-bid-item-button">Update</button>
+            </div>
+            <div class="export-data section">
+                <button id="export-data-button">Export Auction Data</button>
             </div>
         </main>
     </body>

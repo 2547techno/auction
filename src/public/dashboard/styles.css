@@ -2,13 +2,17 @@ main {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
 }
 
-.api-key {
-    display: flex;
-    justify-content: center;
+.section {
+    margin-top: 30px;
 }
 
 #api-key-input {
+    width: 300px;
+}
+
+input {
     margin-left: 5px;
 }
