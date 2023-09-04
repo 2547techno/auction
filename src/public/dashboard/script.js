@@ -36,10 +36,50 @@ function bindEvents() {
         .addEventListener("click", () => {
             forceUpdateOverlay();
         });
+    document
+        .getElementById("update-bid-item-button")
+        .addEventListener("click", () => {
+            const dropdown = document.getElementById("bid-items-dropdown");
+            if (dropdown.value === "none") return;
+
+            updateBidItem(parseInt(dropdown.value));
+        });
 }
 
 function key() {
     return document.getElementById("api-key-input").value ?? "";
+}
+
+function connectToWS() {
+    const url = new URL("/ws", domain);
+    url.protocol = "ws";
+    const ws = new WebSocket(url);
+
+    ws.addEventListener("message", (event) => {
+        if (!event.data) return;
+        const message = JSON.parse(event.data);
+
+        if (message.type === "bid_item") {
+            updateBidItemDOM(message.data.id, message.data.name);
+        }
+    });
+}
+
+async function getBidItems() {
+    const res = await fetch(new URL("/bid_items", domain), {
+        method: "GET",
+        headers: {
+            authorization: `Bearer ${key()}`,
+        },
+    });
+
+    const items = await res.json();
+    for (const item of items) {
+        const option = document.createElement("option");
+        option.value = item.id;
+        option.innerText = item.name;
+        document.getElementById("bid-items-dropdown").appendChild(option);
+    }
 }
 
 function loadApiKey() {
@@ -84,5 +124,28 @@ async function forceUpdateOverlay() {
     return res.status;
 }
 
-bindEvents();
+function updateBidItemDOM(id, name) {
+    document.getElementById(
+        "current-bid-item"
+    ).innerText = `Current bid item: (${id}) "${name}"`;
+}
+
+async function updateBidItem(id) {
+    const res = await fetch(new URL("/bid_item", domain), {
+        method: "PUT",
+        headers: {
+            "content-type": "application/json",
+            authorization: `Bearer ${key()}`,
+        },
+        body: JSON.stringify({
+            id,
+        }),
+    });
+
+    return res.status;
+}
+
 loadApiKey();
+getBidItems();
+connectToWS();
+bindEvents();
