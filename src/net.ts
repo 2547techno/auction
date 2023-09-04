@@ -64,7 +64,6 @@ app.put("/bid_item", [auth, json()], async (req: Request, res: Response) => {
 
     cache.set("currentBidItemId", id);
     broadcast(bidItemMessage());
-    console.log("update bid item id", id);
 
     return res.send();
 });
