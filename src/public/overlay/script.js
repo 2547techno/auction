@@ -5,7 +5,7 @@ let bidItem = {
 let bids = {};
 
 const url = new URL("/ws", window.location);
-url.protocol = url.protocol === ("https:" ? "wss" : "ws");
+url.protocol = (url.protocol === "https:" ? "wss" : "ws");
 const ws = new WebSocket(url);
 
 ws.addEventListener("message", (event) => {
