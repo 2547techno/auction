@@ -68,7 +68,7 @@ app.put("/bid_item", [auth, json()], async (req: Request, res: Response) => {
     return res.send();
 });
 
-app.get("/bid_items", auth, async (req: Request, res: Response) => {
+app.get("/bid_items", async (req: Request, res: Response) => {
     try {
         const rows = await db.pool.query(
             `SELECT * FROM ${config.db.database}.ITEMS`
