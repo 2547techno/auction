@@ -12,7 +12,8 @@
         "lint:watch": "nodemon -e ts,json --exec eslint .",
         "lint:fix": "eslint --fix .",
         "format": "prettier . -w",
-        "format:full": "npm run format && npm run lint:fix"
+        "format:full": "npm run format && npm run lint:fix",
+        "deploy": "npm run build && pm2 restart auction"
     },
     "keywords": [],
     "author": "",
