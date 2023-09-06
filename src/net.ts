@@ -12,7 +12,7 @@ import { db } from "./lib/db.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = config.rest.port;
 const app = Express();
-app.use(Express.static(path.join(__dirname, "./public")));
+app.use(Express.static(path.join(__dirname, "../public")));
 const wss = new WebSocketServer({ noServer: true });
 export const server = http.createServer(app);
 
