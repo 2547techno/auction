@@ -14,6 +14,7 @@ export type Bid = {
     username: string;
     item_id: number;
     bid: number;
+    epoch: number;
 };
 
 class DB {

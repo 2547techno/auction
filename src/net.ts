@@ -126,7 +126,7 @@ app.put(
 );
 
 app.post("/test", [auth, json()], async (req: Request, res: Response) => {
-    await handleEvent(req.body);
+    await handleEvent(req.body.username, req.body.message);
     res.send();
 });
 
