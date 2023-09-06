@@ -52,7 +52,7 @@ function key() {
 
 function connectToWS() {
     const url = new URL("/ws", domain);
-    url.protocol = (url.protocol === "https:" ? "wss" : "ws");
+    url.protocol = url.protocol === "https:" ? "wss" : "ws";
     const ws = new WebSocket(url);
 
     ws.addEventListener("message", (event) => {
